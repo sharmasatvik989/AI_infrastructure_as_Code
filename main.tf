@@ -1,17 +1,19 @@
+# Provider to connect Terraform to your local Kubernetes cluster
 provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
+# Creating a Kubernetes Deployment running a Hello World app
 resource "kubernetes_deployment" "hello" {
   metadata {
-    name = "hello-world"
+    name = "hello-world" # This is the name visible in kubectl get deployments
     labels = {
       app = "hello"
     }
   }
 
   spec {
-    replicas = var.replicas
+    replicas = var.replicas  
 
     selector {
       match_labels = {
@@ -29,8 +31,8 @@ resource "kubernetes_deployment" "hello" {
       spec {
         container {
           name  = "hello-container"
-          image = "nginxdemos/hello"
-          ports {
+          image = "nginxdemos/hello"  # Lightweight Hello World app
+          port {
             container_port = 80
           }
         }
@@ -39,6 +41,7 @@ resource "kubernetes_deployment" "hello" {
   }
 }
 
+# Expose the deployment with a NodePort service so we can access it via localhost:30080
 resource "kubernetes_service" "hello" {
   metadata {
     name = "hello-world-service"
@@ -52,7 +55,7 @@ resource "kubernetes_service" "hello" {
     port {
       port        = 80
       target_port = 80
-      node_port   = 30080
+      node_port   = 30080  # You can change this if you want a different local port
     }
 
     type = "NodePort"
